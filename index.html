@@ -269,16 +269,34 @@
                 },
 
                 // ---------------------- WeWork OA Integration ----------------------
-                // Submit selected supplier to WeWork OA
+                // Submit selected supplier to WeWork OA (修复版：双协议兼容+自动关闭+调试)
                 submitToWeWork() {
                     if (!this.selectedSupplier) {
                         alert('Please select a supplier first!');
                         return;
                     }
+                    // 解析选中的供应商数据
+                    const selectedData = JSON.parse(this.selectedSupplier);
+                    console.log('Submitting to WeWork:', selectedData); // 调试日志
+                    
+                    // 兼容企业微信新版协议 (type: setSelectValue)
                     window.parent.postMessage({
                         type: 'setSelectValue',
-                        value: this.selectedSupplier
+                        value: this.selectedSupplier,
+                        label: selectedData.label
                     }, '*');
+                    
+                    // 兼容企业微信旧版协议 (event: select)
+                    window.parent.postMessage({
+                        event: 'select',
+                        data: selectedData
+                    }, '*');
+                    
+                    // 提示成功并自动关闭页面
+                    alert('Supplier selected successfully!');
+                    setTimeout(() => {
+                        window.close(); // 自动关闭选择页
+                    }, 500);
                 }
             }
         })
